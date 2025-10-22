@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║              🪔 DIWALI DIYA GAME 🪔                              ║
+    ║                                                                  ║
+    ║  A festive interactive game to celebrate Diwali                 ║
+    ║  Light all 5 diyas within 10 seconds to win!                    ║
+    ║                                                                  ║
+    ║  Technical Stack:                                                ║
+    ║  - Pure HTML5 (Semantic markup)                                  ║
+    ║  - CSS3 (Animations, Gradients, Flexbox)                        ║
+    ║  - Vanilla JavaScript (ES6+)                                     ║
+    ║  - Canvas API (Fireworks effects)                                ║
+    ║  - Web Audio API (Background music)                              ║
+    ║                                                                  ║
+    ║  Cross-browser Compatible:                                       ║
+    ║  - Chrome, Firefox, Safari, Edge (Latest versions)              ║
+    ║  - Mobile responsive design                                      ║
+    ║  - Accessibility features (ARIA labels, keyboard support)        ║
+    ║                                                                  ║
+    ║  File: Single self-contained HTML file                           ║
+    ║  No external dependencies required                               ║
+    ╚══════════════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive Diwali Diya Game - Light all 5 diyas before time runs out! Festive celebration game with fireworks.">
+    <meta name="keywords" content="Diwali, Diya, Game, Festival, Interactive, HTML5, Canvas">
+    <title>🪔 Diwali Diya Game - Light the Lamps! 🪔</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS STYLES - DIWALI DIYA GAME
+           ============================================
+           
+           Table of Contents:
+           1. Reset & Base Styles
+           2. Background & Celebration Effects
+           3. Canvas Styles
+           4. Layout & Typography
+           5. Timer Styles
+           6. Diya Containers & Elements
+           7. Diya Animations
+           8. Message & Button Styles
+           9. Sound Toggle
+           10. Responsive Media Queries
+           
+           ============================================ */
+
+        /* ============================================
+           1. RESET & BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: -webkit-linear-gradient(135deg, #0a0015 0%, #1a0033 25%, #2d1b4e 50%, #1a0033 75%, #0a0015 100%);
+            background: -moz-linear-gradient(135deg, #0a0015 0%, #1a0033 25%, #2d1b4e 50%, #1a0033 75%, #0a0015 100%);
+            background: linear-gradient(135deg, #0a0015 0%, #1a0033 25%, #2d1b4e 50%, #1a0033 75%, #0a0015 100%);
+            background-size: 400% 400%;
+            -webkit-animation: gradientShift 15s ease infinite;
+            -moz-animation: gradientShift 15s ease infinite;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Cross-browser animation support */
+        @-webkit-keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @-moz-keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ============================================
+           2. BACKGROUND & CELEBRATION EFFECTS
+           ============================================ */
+        .celebration-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 5;
+        }
+
+        .celebration-glow.active {
+            opacity: 1;
+            animation: glowPulse 2s ease-in-out infinite;
+            background: radial-gradient(circle at center, 
+                rgba(255, 215, 0, 0.3) 0%, 
+                rgba(255, 140, 0, 0.2) 30%, 
+                rgba(255, 69, 0, 0.1) 60%, 
+                transparent 100%);
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* ============================================
+           3. CANVAS STYLES
+           ============================================ */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* ============================================
+           4. LAYOUT & TYPOGRAPHY
+           ============================================ */
+        .game-container {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        h1 {
+            background: -webkit-linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff8c00 100%);
+            background: -moz-linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff8c00 100%);
+            background: -o-linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff8c00 100%);
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-text-fill-color: transparent;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+                letter-spacing: 1px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+
+        .timer {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255, 99, 71, 0.6);
+            letter-spacing: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .timer {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timer {
+                font-size: 1.5em;
+            }
+        }
+
+        .timer.warning {
+            animation: timerBlink 0.5s infinite;
+        }
+
+        @keyframes timerBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .diyas-container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .diyas-container {
+                gap: 35px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .diyas-container {
+                gap: 25px;
+            }
+        }
+
+        .diya {
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .diya::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .diya:hover::before {
+            opacity: 1;
+        }
+
+        .diya:hover {
+            transform: scale(1.15) translateY(-10px);
+        }
+
+        .diya:active {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .diya svg {
+            width: 100px;
+            height: 100px;
+        }
+
+        @media (max-width: 480px) {
+            .diya svg {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        .diya.lit {
+            animation: diyaGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes diyaGlow {
+            0%, 100% {
+                filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3)) 
+                        drop-shadow(0 0 20px rgba(255, 140, 0, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3)) 
+                        drop-shadow(0 0 35px rgba(255, 140, 0, 0.9))
+                        drop-shadow(0 0 50px rgba(255, 215, 0, 0.6));
+            }
+        }
+
+        .diya.lit::before {
+            opacity: 1;
+            background: radial-gradient(circle, 
+                rgba(255, 215, 0, 0.4) 0%, 
+                rgba(255, 140, 0, 0.3) 30%, 
+                rgba(255, 99, 71, 0.15) 60%, 
+                transparent 100%);
+            animation: haloGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes haloGlow {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .diya.lit .flame {
+            display: block;
+            animation: flicker 0.6s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 8px #ff8c00) drop-shadow(0 0 12px #ffd700);
+        }
+
+        .diya.lit .lamp-body {
+            filter: drop-shadow(0 0 20px #ff8c00) 
+                    drop-shadow(0 0 30px #ffd700)
+                    drop-shadow(0 5px 10px rgba(255, 140, 0, 0.4));
+        }
+
+        .flame {
+            display: none;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.85;
+                transform: translateY(0) scale(1) rotate(-2deg);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(-3px) scale(1.08) rotate(2deg);
+            }
+            40% {
+                opacity: 0.9;
+                transform: translateY(-1px) scale(0.95) rotate(-1deg);
+            }
+            60% {
+                opacity: 0.95;
+                transform: translateY(-2px) scale(1.02) rotate(1deg);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(-4px) scale(1.05) rotate(-2deg);
+            }
+            100% {
+                opacity: 0.88;
+                transform: translateY(0) scale(0.98) rotate(0deg);
+            }
+        }
+
+        .message {
+            font-size: 2em;
+            margin: 30px 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            font-weight: 600;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                font-size: 1.5em;
+                min-height: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .message {
+                font-size: 1.2em;
+                min-height: 50px;
+            }
+        }
+
+        .message.show {
+            animation: messageGlow 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes messageGlow {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(-30px);
+            }
+            50% {
+                transform: scale(1.15) translateY(0);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .message.win {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 140, 0, 0.6);
+            font-weight: 700;
+            animation: messageGlow 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+                       textShimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% {
+                filter: brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+            }
+            50% {
+                filter: brightness(1.3) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+            }
+        }
+
+        .message.lose {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 25px rgba(255, 99, 71, 0.7);
+            font-weight: 700;
+        }
+
+        .try-again-btn {
+            display: none;
+            padding: 18px 45px;
+            font-size: 1.3em;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8c42 50%, #ffa500 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(255, 99, 71, 0.4), 
+                        0 3px 10px rgba(255, 140, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin-top: 20px;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .try-again-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .try-again-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .try-again-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(255, 99, 71, 0.6), 
+                        0 5px 15px rgba(255, 140, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            background-position: 100% 50%;
+        }
+
+        .try-again-btn:active {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 99, 71, 0.5);
+        }
+
+        .try-again-btn.show {
+            display: inline-block;
+            animation: fadeInBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes fadeInBounce {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.8);
+            }
+            60% {
+                transform: translateY(-10px) scale(1.05);
+            }
+            80% {
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .try-again-btn {
+                padding: 15px 35px;
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .try-again-btn {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.2em;
+            margin-top: 20px;
+            font-weight: 400;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .instructions {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .instructions {
+                font-size: 0.9em;
+                padding: 0 10px;
+            }
+        }
+
+        .game-container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+            }
+        }
+
+        /* Header section with title */
+        header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Section spacing */
+        .timer-section,
+        .diyas-section,
+        .message-section {
+            margin: 20px 0;
+        }
+
+        footer {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="celebration-glow" id="celebrationGlow"></div>
+    <!-- Canvas for fireworks and confetti effects -->
+    <canvas id="fireworks-canvas" aria-label="Fireworks animation"></canvas>
+    
+    <!-- Background Music Audio Element -->
+    <!-- Audio will autoplay and loop infinitely -->
+    <!-- autoplay attribute tells browser to play immediately -->
+    <!-- muted attribute initially to allow autoplay, then we unmute via JavaScript -->
+    <audio id="backgroundMusic" autoplay loop preload="auto" muted>
+        <source src="Mere Tumhare Sabke Liye Happy Diwali.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <!-- Main game container -->
+    <main class="game-container">
+        <!-- Game header -->
+        <header>
+            <h1>🪔 Light the Diyas! 🪔</h1>
+        </header>
+        
+        <!-- Timer section -->
+        <section class="timer-section">
+            <div class="timer" id="timer" role="timer" aria-live="polite">Time: 10s</div>
+        </section>
+        
+        <!-- Diyas game section -->
+        <section class="diyas-section">
+            <div class="diyas-container" id="diyasContainer" role="group" aria-label="Diya lamps">
+                <!-- Diyas will be generated by JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Message section for win/lose notifications -->
+        <section class="message-section">
+            <div class="message" id="message" role="status" aria-live="polite"></div>
+            <button class="try-again-btn" id="tryAgainBtn" aria-label="Restart game">🔄 Try Again</button>
+        </section>
+        
+        <!-- Instructions -->
+        <footer>
+            <p class="instructions">Click the diyas to light them before time runs out!</p>
+        </footer>
+    </main>
+
+    <script>
+        /* ============================================
+           GAME STATE MANAGEMENT
+           ============================================ */
+        
+        // Core game variables
+        let timeLeft = 10;                    // Countdown timer in seconds
+        let timerInterval = null;             // Reference to setInterval for timer
+        let gameActive = true;                // Flag to check if game is in progress
+        let litDiyas = 0;                     // Counter for lit diyas
+        const totalDiyas = 5;                 // Total number of diyas to light
+        let musicStarted = false;             // Track if music has been started
+
+        /* ============================================
+           DOM ELEMENT REFERENCES
+           ============================================ */
+        
+        // Get all necessary DOM elements
+        const timerElement = document.getElementById('timer');
+        const diyasContainer = document.getElementById('diyasContainer');
+        const messageElement = document.getElementById('message');
+        const tryAgainBtn = document.getElementById('tryAgainBtn');
+        const celebrationGlow = document.getElementById('celebrationGlow');
+        const canvas = document.getElementById('fireworks-canvas');
+        const ctx = canvas.getContext('2d');
+        const bgMusic = document.getElementById('backgroundMusic');  // Reference to audio element
+
+        /* ============================================
+           CANVAS SETUP FOR FIREWORKS
+           ============================================ */
+        
+        // Set canvas dimensions to match window size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Array to store all active particles for fireworks/confetti
+        let particles = [];
+
+        /* ============================================
+           AUDIO MANAGEMENT
+           ============================================ */
+        
+        /* ============================================
+           SOUND/MUSIC FUNCTIONS
+           ============================================ */
+
+        /**
+         * Start background music automatically
+         * Uses the muted autoplay trick: Start muted (allowed by browsers), then unmute immediately
+         */
+        function startBackgroundMusic() {
+            if (!musicStarted && bgMusic) {
+                // First, ensure the audio element is set to autoplay
+                bgMusic.muted = true;  // Start muted to bypass autoplay restrictions
+                
+                // Attempt to play
+                const playPromise = bgMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Successfully started playing (muted)
+                        // Now unmute it immediately
+                        setTimeout(() => {
+                            bgMusic.muted = false;  // Unmute after a tiny delay
+                            musicStarted = true;
+                            console.log('🎵 Background music playing with sound!');
+                        }, 100);  // 100ms delay to ensure playback started
+                    }).catch(error => {
+                        console.log('Autoplay blocked. Trying fallback...', error);
+                        // Fallback: Try again on first user interaction
+                        document.body.addEventListener('click', function startOnClick() {
+                            if (!musicStarted) {
+                                bgMusic.muted = false;
+                                bgMusic.play().then(() => {
+                                    musicStarted = true;
+                                    console.log('🎵 Music started on user click');
+                                }).catch(e => console.log('Failed to start music:', e));
+                                document.body.removeEventListener('click', startOnClick);
+                            }
+                        });
+                    });
+                }
+            }
+        }
+
+        /* ============================================
+           PARTICLE CLASS FOR FIREWORKS EFFECT
+           ============================================ */
+        
+        /**
+         * Particle class represents a single firework particle
+         * Each particle has position, velocity, color, and lifespan
+         */
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;                                    // X position on canvas
+                this.y = y;                                    // Y position on canvas
+                this.color = color;                            // Particle color
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 8,            // Random horizontal velocity
+                    y: (Math.random() - 0.5) * 8 - 2         // Random vertical velocity (upward bias)
+                };
+                this.life = 100;                               // Current lifespan
+                this.maxLife = 100;                            // Maximum lifespan
+                this.size = Math.random() * 3 + 2;            // Random particle size (2-5px)
+                this.gravity = 0.15;                           // Gravity effect for realistic fall
+            }
+
+            /**
+             * Update particle position and apply physics
+             */
+            update() {
+                this.velocity.y += this.gravity;               // Apply gravity
+                this.x += this.velocity.x;                     // Update X position
+                this.y += this.velocity.y;                     // Update Y position
+                this.life--;                                   // Decrease lifespan
+            }
+
+            /**
+             * Draw particle on canvas with fade-out effect
+             */
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life / this.maxLife;    // Fade based on remaining life
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        /* ============================================
+           FIREWORKS ANIMATION FUNCTIONS
+           ============================================ */
+        
+        /**
+         * Create a single firework explosion at given coordinates
+         * @param {number} x - X coordinate for firework center
+         * @param {number} y - Y coordinate for firework center
+         */
+        function createFirework(x, y) {
+            // Festive color palette for fireworks
+            const colors = ['#ffd700', '#ff8c00', '#ff6347', '#ff1493', '#00ff00', '#00ffff', '#ffb347'];
+            
+            // Create 50 particles for each firework explosion
+            for (let i = 0; i < 50; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        /**
+         * Animation loop for fireworks - updates and draws all particles
+         * Uses requestAnimationFrame for smooth 60fps animation
+         */
+        function animateFireworks() {
+            // Clear previous frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw each particle
+            particles.forEach((particle, index) => {
+                particle.update();
+                particle.draw();
+                
+                // Remove dead particles to maintain performance
+                if (particle.life <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+
+            // Continue animation if particles exist
+            if (particles.length > 0) {
+                requestAnimationFrame(animateFireworks);
+            }
+        }
+
+        /**
+         * Trigger multiple fireworks at different positions with delays
+         * Creates a spectacular celebration effect
+         */
+        function triggerFireworks() {
+            // Define 5 different positions for fireworks (strategic spread)
+            const positions = [
+                { x: canvas.width * 0.2, y: canvas.height * 0.3 },   // Left
+                { x: canvas.width * 0.5, y: canvas.height * 0.2 },   // Center top
+                { x: canvas.width * 0.8, y: canvas.height * 0.3 },   // Right
+                { x: canvas.width * 0.35, y: canvas.height * 0.4 },  // Lower left
+                { x: canvas.width * 0.65, y: canvas.height * 0.4 }   // Lower right
+            ];
+
+            let delay = 0;
+            // Launch fireworks sequentially with 300ms delay between each
+            positions.forEach(pos => {
+                setTimeout(() => {
+                    createFirework(pos.x, pos.y);
+                    // Start animation loop if not already running
+                    if (particles.length > 0) {
+                        animateFireworks();
+                    }
+                }, delay);
+                delay += 300;  // Stagger fireworks for dramatic effect
+            });
+        }
+
+        /* ============================================
+           DIYA CREATION AND INITIALIZATION
+           ============================================ */
+        
+        /**
+         * Create a single diya element with SVG graphics
+         * @param {number} index - Index of the diya (0-4)
+         * @returns {HTMLElement} Diya DOM element
+         */
+        function createDiya(index) {
+            const diya = document.createElement('div');
+            diya.className = 'diya';
+            diya.dataset.index = index;
+            diya.setAttribute('role', 'button');
+            diya.setAttribute('tabindex', '0');
+            diya.setAttribute('aria-label', `Diya lamp ${index + 1}, unlit`);
+            
+            diya.innerHTML = `
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Gradients for warm tones -->
+                        <radialGradient id="flameGradient1-${index}">
+                            <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#ff4757;stop-opacity:0.7" />
+                        </radialGradient>
+                        <radialGradient id="flameGradient2-${index}">
+                            <stop offset="0%" style="stop-color:#ffa502;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ff8c00;stop-opacity:0.8" />
+                        </radialGradient>
+                        <radialGradient id="flameGradient3-${index}">
+                            <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ffb347;stop-opacity:1" />
+                        </radialGradient>
+                        <linearGradient id="bowlGradient-${index}" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d4a574;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#cd853f;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#b8733f;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="rimGradient-${index}" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#daa520;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#cd9a3d;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="baseGradient-${index}" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a0522d;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8b4513;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Flame (hidden initially) -->
+                    <g class="flame">
+                        <ellipse cx="50" cy="30" rx="8" ry="12" fill="url(#flameGradient1-${index})" opacity="0.7"/>
+                        <ellipse cx="50" cy="32" rx="6" ry="10" fill="url(#flameGradient2-${index})" opacity="0.9"/>
+                        <ellipse cx="50" cy="34" rx="4" ry="8" fill="url(#flameGradient3-${index})"/>
+                        <!-- Inner glow -->
+                        <ellipse cx="50" cy="35" rx="2" ry="5" fill="#fff9e6" opacity="0.8"/>
+                    </g>
+                    
+                    <!-- Lamp body -->
+                    <g class="lamp-body">
+                        <!-- Wick holder -->
+                        <rect x="47" y="40" width="6" height="8" fill="url(#baseGradient-${index})" rx="1"/>
+                        <rect x="47.5" y="40" width="5" height="7" fill="#654321" rx="1" opacity="0.6"/>
+                        
+                        <!-- Main bowl -->
+                        <ellipse cx="50" cy="60" rx="25" ry="12" fill="url(#bowlGradient-${index})"/>
+                        <ellipse cx="50" cy="58" rx="25" ry="10" fill="#cd853f" opacity="0.8"/>
+                        
+                        <!-- Bowl rim -->
+                        <ellipse cx="50" cy="52" rx="28" ry="8" fill="url(#rimGradient-${index})"/>
+                        <ellipse cx="50" cy="52" rx="26" ry="6" fill="#ffd700" opacity="0.9"/>
+                        <ellipse cx="50" cy="51" rx="24" ry="4" fill="#ffeb99" opacity="0.6"/>
+                        
+                        <!-- Decorative dots -->
+                        <circle cx="35" cy="58" r="2.5" fill="#ff8c42" opacity="0.9"/>
+                        <circle cx="45" cy="58" r="2.5" fill="#ff8c42" opacity="0.9"/>
+                        <circle cx="55" cy="58" r="2.5" fill="#ff8c42" opacity="0.9"/>
+                        <circle cx="65" cy="58" r="2.5" fill="#ff8c42" opacity="0.9"/>
+                        
+                        <!-- Highlight dots -->
+                        <circle cx="35" cy="57" r="1" fill="#ffa500" opacity="0.8"/>
+                        <circle cx="45" cy="57" r="1" fill="#ffa500" opacity="0.8"/>
+                        <circle cx="55" cy="57" r="1" fill="#ffa500" opacity="0.8"/>
+                        <circle cx="65" cy="57" r="1" fill="#ffa500" opacity="0.8"/>
+                        
+                        <!-- Base -->
+                        <ellipse cx="50" cy="70" rx="15" ry="8" fill="url(#baseGradient-${index})"/>
+                        <ellipse cx="50" cy="68" rx="15" ry="6" fill="#a0522d" opacity="0.8"/>
+                        
+                        <!-- Highlight on rim -->
+                        <ellipse cx="50" cy="50.5" rx="20" ry="2" fill="#fff9e6" opacity="0.4"/>
+                    </g>
+                </svg>
+            `;
+            
+            // Add click event listener to light the diya
+            diya.addEventListener('click', () => lightDiya(diya));
+            
+            // Add keyboard support for accessibility (Enter or Space key)
+            diya.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    lightDiya(diya);
+                }
+            });
+            
+            return diya;
+        }
+
+        /**
+         * Initialize all diyas and add them to the container
+         * Clears existing diyas and creates fresh set of 5 diyas
+         */
+        function initDiyas() {
+            diyasContainer.innerHTML = '';
+            for (let i = 0; i < totalDiyas; i++) {
+                diyasContainer.appendChild(createDiya(i));
+            }
+        }
+
+        /* ============================================
+           GAME LOGIC FUNCTIONS
+           ============================================ */
+
+        /**
+         * Light a diya when clicked
+         * @param {HTMLElement} diya - The diya element to light
+         */
+        function lightDiya(diya) {
+            // Ignore clicks if game is over or diya is already lit
+            if (!gameActive || diya.classList.contains('lit')) return;
+            
+            // Add lit class to trigger CSS animations
+            diya.classList.add('lit');
+            diya.setAttribute('aria-label', `Diya lamp ${parseInt(diya.dataset.index) + 1}, lit`);
+            litDiyas++;
+            
+            // Check if all diyas are lit (win condition)
+            if (litDiyas === totalDiyas) {
+                winGame();
+            }
+        }
+
+        /**
+         * Start the countdown timer
+         * Timer counts down from 10 seconds to 0
+         */
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time: ${timeLeft}s`;
+                
+                // Add warning animation when time is running out (last 3 seconds)
+                if (timeLeft <= 3) {
+                    timerElement.classList.add('warning');
+                }
+                
+                // Game over when timer reaches 0
+                if (timeLeft <= 0) {
+                    loseGame();
+                }
+            }, 1000);  // Update every 1000ms (1 second)
+        }
+
+        /**
+         * Handle win condition
+         * Displays victory message and triggers celebration effects
+         */
+        function winGame() {
+            gameActive = false;                    // Stop game interactions
+            clearInterval(timerInterval);          // Stop the timer
+            
+            // Display winning message
+            messageElement.textContent = '🎇 You spread the light faster than darkness! Happy Diwali 🎆';
+            messageElement.className = 'message win show';
+            
+            // Trigger celebration effects
+            celebrationGlow.classList.add('active');   // Add screen glow
+            triggerFireworks();                         // Launch fireworks
+            
+            // Show retry button
+            tryAgainBtn.classList.add('show');
+        }
+
+        /**
+         * Handle lose condition
+         * Displays game over message with retry option
+         */
+        function loseGame() {
+            gameActive = false;                    // Stop game interactions
+            clearInterval(timerInterval);          // Stop the timer
+            
+            // Display losing message
+            messageElement.textContent = '⏳ Time\'s up! Try again and spread the light!';
+            messageElement.className = 'message lose show';
+            
+            // Show retry button
+            tryAgainBtn.classList.add('show');
+        }
+
+        /**
+         * Reset and restart the game
+         * Clears all game state and UI elements, starts fresh game
+         */
+        function resetGame() {
+            // Reset game state variables
+            gameActive = true;
+            timeLeft = 10;
+            litDiyas = 0;
+            particles = [];
+            
+            // Reset UI elements
+            timerElement.textContent = 'Time: 10s';
+            timerElement.classList.remove('warning');
+            messageElement.className = 'message';
+            messageElement.textContent = '';
+            tryAgainBtn.classList.remove('show');
+            celebrationGlow.classList.remove('active');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Reinitialize diyas and restart timer
+            initDiyas();
+            startTimer();
+        }
+
+        /* ============================================
+           EVENT LISTENERS
+           ============================================ */
+
+        // Try Again button - restart game
+        tryAgainBtn.addEventListener('click', resetGame);
+
+        // Handle window resize - update canvas dimensions
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        /* ============================================
+           GAME INITIALIZATION
+           ============================================ */
+
+        // Initialize game on page load
+        // This automatically starts the 10-second timer as required
+        initDiyas();
+        startTimer();
+        
+        // Start background music automatically
+        startBackgroundMusic();
+    </script>
+</body>
+</html>
